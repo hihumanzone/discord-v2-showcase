@@ -90,6 +90,7 @@ src/
 
 - The bot resolves the application ID from the bot token, so `CLIENT_ID` is not required.
 - The command definition is restricted to guild contexts when the installed discord.js surface supports command contexts, with a safe fallback for older builder support.
+- When `GUILD_ID` is set, startup deployment automatically removes any global `/v2-showcase` registration so Discord does not show the same command twice.
 - The showcase validates its outgoing Components V2 payloads before sending them, which helps catch component-count and attachment-limit mistakes early.
 - Shared message assets are attached once to the main showcase message and only exposed through V2 components.
 

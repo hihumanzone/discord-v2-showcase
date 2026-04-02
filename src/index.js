@@ -38,6 +38,9 @@ client.once(Events.ClientReady, async (readyClient) => {
     const result = await deployCommands();
     if (result.scope === 'guild') {
       logger.info('deploy', `Deployed ${SHOWCASE_COMMAND_NAME} to guild ${result.target}`);
+      if (result.removedGlobalDuplicates > 0) {
+        logger.info('deploy', `Removed ${result.removedGlobalDuplicates} global duplicate command registration(s).`);
+      }
       return;
     }
 

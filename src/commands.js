@@ -38,6 +38,8 @@ function buildShowcaseCommand() {
 export const commandBuilders = [buildShowcaseCommand()];
 export const commandData = commandBuilders.map((command) => command.toJSON());
 
+const managedCommandNames = new Set(commandData.map((command) => command.name));
+
 let cachedApplicationId = null;
 
 async function resolveApplicationId(rest) {
@@ -50,6 +52,33 @@ async function resolveApplicationId(rest) {
   return cachedApplicationId;
 }
 
+function listManagedCommands(commands) {
+  return commands.filter((command) => managedCommandNames.has(command.name));
+}
+
+async function deleteCommands(rest, deleteRoutes) {
+  await Promise.all(deleteRoutes.map((route) => rest.delete(route)));
+  return deleteRoutes.length;
+}
+
+async function removeManagedGlobalCommands(rest, applicationId) {
+  const globalCommands = await rest.get(Routes.applicationCommands(applicationId));
+  const deleteRoutes = listManagedCommands(globalCommands).map((command) =>
+    Routes.applicationCommand(applicationId, command.id),
+  );
+
+  return deleteCommands(rest, deleteRoutes);
+}
+
+async function removeManagedGuildCommands(rest, applicationId, guildId) {
+  const guildCommands = await rest.get(Routes.applicationGuildCommands(applicationId, guildId));
+  const deleteRoutes = listManagedCommands(guildCommands).map((command) =>
+    Routes.applicationGuildCommand(applicationId, guildId, command.id),
+  );
+
+  return deleteCommands(rest, deleteRoutes);
+}
+
 export async function deployCommands() {
   const rest = new REST({ version: '10' }).setToken(config.botToken);
   const applicationId = await resolveApplicationId(rest);
@@ -59,10 +88,14 @@ export async function deployCommands() {
       body: commandData,
     });
 
+    const removedGlobalDuplicates = await removeManagedGlobalCommands(rest, applicationId);
+
     return {
       scope: 'guild',
       target: config.guildId,
       applicationId,
+      removedGlobalDuplicates,
+      removedGuildDuplicates: 0,
     };
   }
 
@@ -74,5 +107,19 @@ export async function deployCommands() {
     scope: 'global',
     target: applicationId,
     applicationId,
+    removedGlobalDuplicates: 0,
+    removedGuildDuplicates: 0,
+  };
+}
+
+export async function clearGuildCommandDuplicates(guildId) {
+  const rest = new REST({ version: '10' }).setToken(config.botToken);
+  const applicationId = await resolveApplicationId(rest);
+  const removedGuildDuplicates = await removeManagedGuildCommands(rest, applicationId, guildId);
+
+  return {
+    applicationId,
+    guildId,
+    removedGuildDuplicates,
   };
 }
