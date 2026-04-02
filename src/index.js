@@ -37,9 +37,15 @@ const state = {
 };
 
 async function registerCommands() {
+  const clientId = client.application?.id;
+
+  if (!clientId) {
+    throw new Error('Unable to resolve application ID from the logged-in bot user.');
+  }
+
   const route = config.guildId
-    ? Routes.applicationGuildCommands(config.clientId, config.guildId)
-    : Routes.applicationCommands(config.clientId);
+    ? Routes.applicationGuildCommands(clientId, config.guildId)
+    : Routes.applicationCommands(clientId);
 
   await rest.put(route, { body: commands });
 }

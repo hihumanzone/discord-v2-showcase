@@ -1,4 +1,4 @@
-const required = ['DISCORD_TOKEN', 'DISCORD_CLIENT_ID'];
+const required = ['DISCORD_TOKEN'];
 
 function getConfig() {
   const missing = required.filter((key) => !process.env[key]);
@@ -9,7 +9,6 @@ function getConfig() {
 
   return {
     token: process.env.DISCORD_TOKEN,
-    clientId: process.env.DISCORD_CLIENT_ID,
     guildId: process.env.DISCORD_GUILD_ID ?? null,
   };
 }

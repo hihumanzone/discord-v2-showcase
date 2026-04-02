@@ -47,7 +47,7 @@ src/
 ## Prerequisites
 
 - Node.js `20.11+`
-- A Discord application + bot token
+- A Discord application bot token
 - Bot invited to a server with command and message component permissions
 
 ## Setup
@@ -60,7 +60,6 @@ src/
 2. Create `.env` in project root:
    ```env
    DISCORD_TOKEN=your_bot_token
-   DISCORD_CLIENT_ID=your_application_id
    # Optional: faster command updates during development
    DISCORD_GUILD_ID=your_test_guild_id
    ```
