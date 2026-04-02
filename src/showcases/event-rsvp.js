@@ -54,12 +54,14 @@ export async function setupEventRSVP(client) {
       const customId = interaction.customId;
 
       if (customId.startsWith('rsvp_')) {
-        const [_, eventId, status] = customId.split('_');
+        const parts = customId.split('_');
+        const status = parts[parts.length - 1];
+        const eventId = parts.slice(1, -1).join('_');
         const event = events.get(eventId);
         
         if (!event) {
           await interaction.reply({
-            flags: MessageFlags.Ephemeral,
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
             components: [new TextDisplayBuilder().setContent('❌ Event not found.')]
           });
           return;
@@ -89,7 +91,7 @@ export async function setupEventRSVP(client) {
 
         // Send ephemeral confirmation
         await interaction.followUp({
-          flags: MessageFlags.Ephemeral,
+          flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
           components: [
             new TextDisplayBuilder().setContent(
               `## ${statusEmojis[status]} RSVP Updated!\n\n` +
@@ -102,12 +104,14 @@ export async function setupEventRSVP(client) {
       }
 
       if (customId.startsWith('view_')) {
-        const [_, eventId, listType] = customId.split('_');
+        const parts = customId.split('_');
+        const listType = parts[parts.length - 1];
+        const eventId = parts.slice(1, -1).join('_');
         const event = events.get(eventId);
 
         if (!event) {
           await interaction.reply({
-            flags: MessageFlags.Ephemeral,
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
             components: [new TextDisplayBuilder().setContent('❌ Event not found.')]
           });
           return;

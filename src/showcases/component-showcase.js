@@ -48,16 +48,13 @@ export async function setupComponentShowcase(client) {
           .setDescription('Bot avatar thumbnail')
       );
 
-    // Introduction text
-    const introText = new TextDisplayBuilder().setContent(
-      'Welcome to the **ultimate Components V2 demonstration**! This message showcases every display component type available in Discord\'s new component system.\n\n' +
-      '> 💡 **Note:** This entire message is built using components—no embeds or traditional content!'
-    );
-
     // Text Display showcase container
     const textDisplayContainer = new ContainerBuilder()
       .setAccentColor(0x5865F2)
       .addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(
+          'Welcome to the **ultimate Components V2 demonstration**. This message uses component-driven layout instead of traditional embeds.'
+        ),
         new TextDisplayBuilder().setContent('### 📝 Text Display Component'),
         new TextDisplayBuilder().setContent(
           'Text Display components support **full markdown formatting**:\n' +
@@ -108,14 +105,7 @@ export async function setupComponentShowcase(client) {
           .setDescription('Gallery item 1 - Scenic view'),
         new MediaGalleryItemBuilder()
           .setURL('https://picsum.photos/seed/gallery2/400/300')
-          .setDescription('Gallery item 2 - Nature'),
-        new MediaGalleryItemBuilder()
-          .setURL('https://picsum.photos/seed/gallery3/400/300')
-          .setDescription('Gallery item 3 - Architecture'),
-        new MediaGalleryItemBuilder()
-          .setURL('https://picsum.photos/seed/gallery4/400/300')
-          .setSpoiler(true)
-          .setDescription('Gallery item 4 - Spoiler image!')
+          .setDescription('Gallery item 2 - Nature')
       );
 
     const galleryContainer = new ContainerBuilder()
@@ -131,7 +121,7 @@ export async function setupComponentShowcase(client) {
       .setAccentColor(0xFEE75C)
       .addTextDisplayComponents(
         new TextDisplayBuilder().setContent('### 📋 Select Menu Components'),
-        new TextDisplayBuilder().setContent('Interactive dropdown menus for user selection. Try each one below!')
+        new TextDisplayBuilder().setContent('Interactive dropdown menus for user selection. This compact demo includes string and user pickers.')
       )
       .addActionRowComponents(
         new ActionRowBuilder().addComponents(
@@ -153,29 +143,6 @@ export async function setupComponentShowcase(client) {
             .setPlaceholder('Select a team member...')
             .setMaxValues(3)
         )
-      )
-      .addActionRowComponents(
-        new ActionRowBuilder().addComponents(
-          new RoleSelectMenuBuilder()
-            .setCustomId('showcase_role_select')
-            .setPlaceholder('Choose notification roles...')
-            .setMaxValues(5)
-        )
-      )
-      .addActionRowComponents(
-        new ActionRowBuilder().addComponents(
-          new ChannelSelectMenuBuilder()
-            .setCustomId('showcase_channel_select')
-            .setPlaceholder('Pick a channel...')
-            .addChannelTypes(0) // Text channels only
-        )
-      )
-      .addActionRowComponents(
-        new ActionRowBuilder().addComponents(
-          new MentionableSelectMenuBuilder()
-            .setCustomId('showcase_mentionable_select')
-            .setPlaceholder('Select users or roles...')
-        )
       );
 
     // Buttons showcase
@@ -183,37 +150,18 @@ export async function setupComponentShowcase(client) {
       .setAccentColor(0xEB459E)
       .addTextDisplayComponents(
         new TextDisplayBuilder().setContent('### 🔵 Button Styles'),
-        new TextDisplayBuilder().setContent('Five button styles for different action types:')
+        new TextDisplayBuilder().setContent('Common button styles for different action types:')
       )
       .addActionRowComponents(
         new ActionRowBuilder().addComponents(
           new ButtonBuilder().setCustomId('btn_primary').setLabel('Primary').setStyle(ButtonStyle.Primary).setEmoji('🔵'),
           new ButtonBuilder().setCustomId('btn_secondary').setLabel('Secondary').setStyle(ButtonStyle.Secondary).setEmoji('⚪'),
           new ButtonBuilder().setCustomId('btn_success').setLabel('Success').setStyle(ButtonStyle.Success).setEmoji('✅'),
-          new ButtonBuilder().setCustomId('btn_danger').setLabel('Danger').setStyle(ButtonStyle.Danger).setEmoji('❌')
-        )
-      )
-      .addActionRowComponents(
-        new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setLabel('Discord Docs')
             .setURL('https://discord.com/developers/docs/components/overview')
             .setStyle(ButtonStyle.Link)
             .setEmoji('🔗')
-        )
-      );
-
-    // Feature list with separators
-    const featuresSection = new SectionBuilder()
-      .addTextDisplayComponents(
-        new TextDisplayBuilder().setContent('### ⭐ Key Features'),
-        new TextDisplayBuilder().setContent(
-          '• Up to **40 components** per message\n' +
-          '• **Nested layouts** with Containers\n' +
-          '• **Rich markdown** in Text Display\n' +
-          '• **Visual organization** with Sections\n' +
-          '• **Media galleries** for images\n' +
-          '• **File attachments** as components'
         )
       );
 
@@ -227,21 +175,23 @@ export async function setupComponentShowcase(client) {
       flags: MessageFlags.IsComponentsV2,
       components: [
         headerSection,
-        introText,
         separatorExample,
         textDisplayContainer,
-        separatorExample,
         sectionWithButton,
         sectionWithThumbnail,
         separatorExample,
         galleryContainer,
         separatorExample,
-        selectMenusContainer,
-        separatorExample,
-        buttonsContainer,
-        separatorExample,
-        featuresSection,
         footerText
+      ]
+    });
+
+    await interaction.followUp({
+      flags: MessageFlags.IsComponentsV2,
+      components: [
+        new TextDisplayBuilder().setContent('## 🔁 Follow-up: Interactive Controls\n\nPart 2 contains the interactive select menus and button style demos.'),
+        selectMenusContainer,
+        buttonsContainer
       ]
     });
   });

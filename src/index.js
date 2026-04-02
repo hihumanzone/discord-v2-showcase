@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Collection, SlashCommandBuilder, MessageFlags } from 'discord.js';
-import { REST, Routes } from '@discordjs/rest';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
 import dotenv from 'dotenv';
 
 // Load environment variables
