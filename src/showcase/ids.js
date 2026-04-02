@@ -1,3 +1,5 @@
+const { randomUUID } = require('node:crypto');
+
 const PREFIX = 'v2show';
 
 function makeId(sessionId, action) {
@@ -13,7 +15,7 @@ function parseId(customId) {
 }
 
 function createSessionId() {
-  return Math.random().toString(36).slice(2, 10);
+  return randomUUID().replaceAll('-', '').slice(0, 16);
 }
 
 module.exports = { makeId, parseId, createSessionId };
