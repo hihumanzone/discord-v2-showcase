@@ -76,17 +76,19 @@ npm install
 cp .env.example .env
 ```
 
-4. Edit `.env` with your credentials:
+4. Edit `.env` with your Discord bot token:
 ```env
 DISCORD_TOKEN=your_bot_token_here
-CLIENT_ID=your_application_id_here
-GUILD_ID=your_test_guild_id_here
 ```
+
+That's it! The bot automatically detects its client ID after login and registers global commands that work in all servers where the bot is invited.
 
 5. Start the bot:
 ```bash
 npm start
 ```
+
+6. Invite the bot to your server using the OAuth2 URL from the Discord Developer Portal, then use the slash commands!
 
 ## Usage
 

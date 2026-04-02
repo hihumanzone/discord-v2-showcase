@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, SlashCommandBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, SlashCommandBuilder, MessageFlags } from 'discord.js';
 import { REST, Routes } from '@discordjs/rest';
 import dotenv from 'dotenv';
 
@@ -44,8 +44,7 @@ async function registerCommands() {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    const guildId = process.env.GUILD_ID;
-    const clientId = process.env.CLIENT_ID;
+    const clientId = client.user.id;
 
     // Format commands for the API
     const commandData = commands.map(cmd => ({
@@ -54,21 +53,12 @@ async function registerCommands() {
       options: []
     }));
 
-    if (guildId) {
-      // Guild-specific commands (faster for testing)
-      await rest.put(
-        Routes.applicationGuildCommands(clientId, guildId),
-        { body: commandData }
-      );
-      console.log(`Successfully registered ${commandData.length} guild commands.`);
-    } else {
-      // Global commands (takes up to 1 hour to propagate)
-      await rest.put(
-        Routes.applicationCommands(clientId),
-        { body: commandData }
-      );
-      console.log(`Successfully registered ${commandData.length} global commands.`);
-    }
+    // Always use global commands - works everywhere without guild ID
+    await rest.put(
+      Routes.applicationCommands(clientId),
+      { body: commandData }
+    );
+    console.log(`Successfully registered ${commandData.length} global commands.`);
   } catch (error) {
     console.error('Error registering commands:', error);
   }
@@ -109,12 +99,7 @@ async function main() {
   // Validate required environment variables
   if (!process.env.DISCORD_TOKEN) {
     console.error('❌ Missing DISCORD_TOKEN in environment variables');
-    console.error('   Copy .env.example to .env and fill in your credentials');
-    process.exit(1);
-  }
-
-  if (!process.env.CLIENT_ID) {
-    console.error('❌ Missing CLIENT_ID in environment variables');
+    console.error('   Copy .env.example to .env and add your bot token');
     process.exit(1);
   }
 
