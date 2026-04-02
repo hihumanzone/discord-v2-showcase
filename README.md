@@ -23,8 +23,6 @@ A polished Discord Display Message Components V2 showcase built with `discord.js
 2. Copy `.env.example` to `.env` and set values:
 
    - `DISCORD_TOKEN`
-   - `DISCORD_CLIENT_ID`
-   - `DISCORD_GUILD_ID` (optional, recommended for fast command updates)
    - `AUTO_REGISTER_COMMANDS=true`
 
 3. Start the bot:
