@@ -65,7 +65,7 @@ function homeScene(session) {
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('## A polished Components V2 product surface'),
+          text('## 🏠 A polished Components V2 product surface'),
           text('This showcase is intentionally cohesive: every scene is a real interaction pattern, not a pile of disconnected snippets.'),
           text('-# The public message is fully component-driven. No legacy `content`. No embeds. No attachment auto-rendering.'),
         )
@@ -78,7 +78,7 @@ function homeScene(session) {
     )
     .addSeparatorComponents(separator(SeparatorSpacingSize.Large))
     .addTextDisplayComponents(
-      text('### What this demo covers\n- Rich message layouts with containers, sections, separators, media galleries, thumbnails, and file components\n- Stateful buttons and select menus in a shared public message\n- Modal flows that update the original showcase and also produce realistic follow-up outcomes'),
+      text('### 📋 What this demo covers\n- Rich message layouts with containers, sections, separators, media galleries, thumbnails, and file components\n- Stateful buttons and select menus in a shared public message\n- Modal flows that update the original showcase and also produce realistic follow-up outcomes'),
     )
     .addMediaGalleryComponents(
       gallery([
@@ -108,13 +108,13 @@ function homeScene(session) {
   const supporting = new ContainerBuilder()
     .setAccentColor(0x2b2d31)
     .addTextDisplayComponents(
-      text('## Explore intentionally named scenes'),
+      text('## 🧭 Explore intentionally named scenes'),
       text('**Product Tour** demonstrates rich storytelling. **Launch Builder** demonstrates message select menus plus modal selects. **Bug Desk** shows structured reporting. **Release Room** handles publish outcomes. **Labs** adds one more polished modal workflow.'),
     )
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('### Public-channel safe behavior'),
+          text('### 🔒 Public-channel safe behavior'),
           text('Only the original opener can mutate the shared state. Other viewers can read the showcase without hijacking the active demo session.'),
         )
         .setButtonAccessory(
@@ -123,7 +123,7 @@ function homeScene(session) {
     );
 
   return [
-    text('# Discord Components V2 Showcase\n-# A production-ready discord.js demo built around current documented Components V2 behavior.'),
+    text('# ✨ Discord Components V2 Showcase\n-# A production-ready discord.js demo built around current documented Components V2 behavior.'),
     hero,
     separator(SeparatorSpacingSize.Large, true),
     supporting,
@@ -168,7 +168,7 @@ function tourScene(session) {
     )
     .addSeparatorComponents(separator(SeparatorSpacingSize.Small, true))
     .addTextDisplayComponents(
-      text('### This scene demonstrates\n- Hero storytelling with a thumbnail accessory\n- Media gallery presentation inside a cohesive launch narrative\n- Personalization through a modal\n- Public follow-up publishing as a realistic outcome'),
+      text('### ✨ This scene demonstrates\n- Hero storytelling with a thumbnail accessory\n- Media gallery presentation inside a cohesive launch narrative\n- Personalization through a modal\n- Public follow-up publishing as a realistic outcome'),
     );
 
   return [
@@ -205,7 +205,7 @@ function builderPreview(session) {
 
   const builder = session.builder;
   return [
-    '### Launch preview',
+    '### 🚀 Launch preview',
     `We will ship **${session.tour.productName}** with the **${builder.presetLabel}** preset.`,
     `Primary rooms: ${formatList(builder.modalChannels.length ? builder.modalChannels : builder.channels)}`,
     `Approvals: ${formatList(builder.modalApprovers.length ? builder.modalApprovers : builder.reviewers)}`,
@@ -219,7 +219,7 @@ function builderScene(session) {
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('## Launch Builder'),
+          text('## 🚀 Launch Builder'),
           text('Configure a realistic rollout using message select menus, then enrich it with a modal using the newer modal-select patterns.'),
           text(`-# Preview generated: **${session.builder.previewGenerated ? 'yes' : 'not yet'}**`),
         )
@@ -290,20 +290,20 @@ function builderScene(session) {
 function bugScene(session) {
   const reportSummary = session.bug.summary
     ? [
-        '### Latest report',
+        '### 🐞 Latest report',
         `Severity: **${session.bug.severityLabel ?? 'n/a'}**`,
         `Summary: ${session.bug.summary}`,
         `Reproduction: ${session.bug.reproduction}`,
         `Uploaded files: ${formatList(session.bug.uploadedFileNames)}`,
       ].join('\n')
-    : '### Latest report\nNo bug report has been submitted in this session yet.';
+    : '### 🐞 Latest report\nNo bug report has been submitted in this session yet.';
 
   const surface = new ContainerBuilder()
     .setAccentColor(ACCENTS.bug)
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('## Bug Desk'),
+          text('## 🐞 Bug Desk'),
           text('A realistic support flow: severity triage, structured written details, optional file uploads, and a stateful summary back in the showcase.'),
           text('-# The receipt and triage artifact are returned as a separate V2 response after the modal is submitted.'),
         )
@@ -335,7 +335,7 @@ function releaseScene(session) {
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('## Release Room'),
+          text('## 📦 Release Room'),
           text('This scene combines display components, a checklist artifact, and realistic publish outcomes into a compact release command center.'),
           text(`-# Published updates in this session: **${session.release.publishedCount}**`),
         )
@@ -365,7 +365,7 @@ function releaseScene(session) {
     )
     .addSeparatorComponents(separator(SeparatorSpacingSize.Small, true))
     .addTextDisplayComponents(
-      text('### Included artifact\nThe live scene exposes the launch checklist as an in-message file component, while the publish action posts a separate release update with richer supporting assets.'),
+      text('### 📎 Included artifact\nThe live scene exposes the launch checklist as an in-message file component, while the publish action posts a separate release update with richer supporting assets.'),
     )
     .addFileComponents(fileComponent(ASSETS.launchChecklist));
 
@@ -383,20 +383,20 @@ function releaseScene(session) {
 function labsScene(session) {
   const currentDraft = session.labs.headline
     ? [
-        '### Latest labs brief',
+        '### 🧪 Latest labs brief',
         `Tone: **${session.labs.toneLabel ?? 'n/a'}**`,
         `Headline: ${session.labs.headline}`,
         `Notes: ${session.labs.notes ?? 'n/a'}`,
         `Published briefs: **${session.labs.publishedCount}**`,
       ].join('\n')
-    : '### Latest labs brief\nNo labs brief has been composed yet.';
+    : '### 🧪 Latest labs brief\nNo labs brief has been composed yet.';
 
   const card = new ContainerBuilder()
     .setAccentColor(ACCENTS.labs)
     .addSectionComponents(
       new SectionBuilder()
         .addTextDisplayComponents(
-          text('## Labs'),
+          text('## 🧪 Labs'),
           text('A final polished workflow for drafting a short experiment brief inside a modal and posting it back out as a component-first follow-up.'),
           text('-# This scene stays on documented, stable builders so the full showcase remains production-friendly.'),
         )

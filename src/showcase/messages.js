@@ -39,7 +39,7 @@ export function buildBugReceiptMessage(session) {
       ephemeral: true,
       files: subsetFiles([ASSETS.triageTemplate]),
       components: [
-        text('## Bug report submitted\nThe live showcase has been updated with the latest triage summary.'),
+        text('## 🐞 Bug report submitted\nThe live showcase has been updated with the latest triage summary.'),
         new ContainerBuilder()
           .setAccentColor(ACCENTS.bug)
           .addTextDisplayComponents(
@@ -86,11 +86,11 @@ export function buildReleasePublishMessage(session) {
     {
       files: subsetFiles([ASSETS.analytics, ASSETS.quality, ASSETS.releaseNotes]),
       components: [
-        text('## Launch update published\n-# A polished public-facing outcome from the Release Room scene.'),
+        text('## 📦 Launch update published\n-# A polished public-facing outcome from the Release Room scene.'),
         new ContainerBuilder()
           .setAccentColor(ACCENTS.release)
           .addTextDisplayComponents(
-            text('### Release posture\nConfidence is high, artifacts are attached, and the release room now reflects a completed publish action.'),
+            text('### 📈 Release posture\nConfidence is high, artifacts are attached, and the release room now reflects a completed publish action.'),
           )
           .addMediaGalleryComponents(
             gallery([
@@ -119,7 +119,7 @@ export function buildLabsPublishMessage(session) {
     {
       files: subsetFiles([ASSETS.labs, ASSETS.manifest]),
       components: [
-        text(`## ${session.labs.headline}\n-# Labs brief published from the showcase.`),
+        text(`## 🧪 ${session.labs.headline}\n-# Labs brief published from the showcase.`),
         new SectionBuilder()
           .addTextDisplayComponents(
             text(`Tone: **${toneLabel}**`),

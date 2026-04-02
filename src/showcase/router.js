@@ -61,7 +61,7 @@ async function editSessionMessage(client, session) {
 
 async function postShowcaseOutcome(interaction, payload) {
   if (!interaction.channel?.isTextBased()) {
-    await interaction.followUp(buildEphemeralNote('### This channel cannot receive the showcase follow-up\nTry running the command in a standard text channel.'));
+    await interaction.followUp(buildEphemeralNote('### ⚠️ This channel cannot receive the showcase follow-up\nTry running the command in a standard text channel.'));
     return false;
   }
 
@@ -148,7 +148,7 @@ async function handleSelect(interaction, session, action) {
       break;
     }
     default: {
-      await interaction.reply(buildEphemeralNote('### Unknown control\nThat select menu is not wired to a showcase action.'));
+      await interaction.reply(buildEphemeralNote('### ⚠️ Unknown control\nThat select menu is not wired to a showcase action.'));
       return;
     }
   }
@@ -177,7 +177,7 @@ async function handleAction(interaction, session, action) {
       session.tour.publishedCount += 1;
       await interaction.update(buildMainShowcaseMessage(session, { includeFlags: false }));
       if (await postShowcaseOutcome(interaction, buildTourPublishMessage(session))) {
-        await interaction.followUp(buildEphemeralNote('### Teaser published\nA mock product teaser was posted to the channel and the showcase recorded the updated state.'));
+        await interaction.followUp(buildEphemeralNote('### ✨ Teaser published\nA mock product teaser was posted to the channel and the showcase recorded the updated state.'));
       }
       return;
     }
@@ -211,7 +211,7 @@ async function handleAction(interaction, session, action) {
       session.release.publishedCount += 1;
       await interaction.update(buildMainShowcaseMessage(session, { includeFlags: false }));
       if (await postShowcaseOutcome(interaction, buildReleasePublishMessage(session))) {
-        await interaction.followUp(buildEphemeralNote('### Launch update published\nThe channel just received a polished Components V2 release update.'));
+        await interaction.followUp(buildEphemeralNote('### 📦 Launch update published\nThe channel just received a polished Components V2 release update.'));
       }
       return;
     }
@@ -226,19 +226,19 @@ async function handleAction(interaction, session, action) {
     }
     case 'labs:publish': {
       if (!session.labs.headline) {
-        await interaction.reply(buildEphemeralNote('### Compose a labs brief first\nOpen the modal, draft a short brief, and then publish it.'));
+        await interaction.reply(buildEphemeralNote('### 🧪 Compose a labs brief first\nOpen the modal, draft a short brief, and then publish it.'));
         return;
       }
 
       session.labs.publishedCount += 1;
       await interaction.update(buildMainShowcaseMessage(session, { includeFlags: false }));
       if (await postShowcaseOutcome(interaction, buildLabsPublishMessage(session))) {
-        await interaction.followUp(buildEphemeralNote('### Labs brief published\nA component-first brief has been posted to the channel.'));
+        await interaction.followUp(buildEphemeralNote('### 🧪 Labs brief published\nA component-first brief has been posted to the channel.'));
       }
       return;
     }
     default: {
-      await interaction.reply(buildEphemeralNote('### Unknown action\nThat control is not wired to a showcase action.'));
+      await interaction.reply(buildEphemeralNote('### ⚠️ Unknown action\nThat control is not wired to a showcase action.'));
     }
   }
 }
@@ -263,7 +263,7 @@ export async function handleShowcaseModal(interaction) {
       session.tour.highlight = interaction.fields.getTextInputValue(FIELD_IDS.tourHighlight);
       session.scene = SCENES.tour;
       await editSessionMessage(interaction.client, session);
-      await interaction.reply(buildEphemeralNote('### Product tour updated\nThe live showcase message now reflects your revised hero copy and audience framing.'));
+      await interaction.reply(buildEphemeralNote('### ✨ Product tour updated\nThe live showcase message now reflects your revised hero copy and audience framing.'));
       return;
     }
     case 'builder-assistant': {
@@ -285,7 +285,7 @@ export async function handleShowcaseModal(interaction) {
       session.builder.previewGenerated = true;
       session.scene = SCENES.builder;
       await editSessionMessage(interaction.client, session);
-      await interaction.reply(buildEphemeralNote('### Launch assistant applied\nThe builder scene now includes the richer modal-based selections in the live preview.'));
+      await interaction.reply(buildEphemeralNote('### 🚀 Launch assistant applied\nThe builder scene now includes the richer modal-based selections in the live preview.'));
       return;
     }
     case 'bug-report': {
@@ -311,11 +311,11 @@ export async function handleShowcaseModal(interaction) {
       session.labs.notes = interaction.fields.getTextInputValue(FIELD_IDS.labsNotes) || null;
       session.scene = SCENES.labs;
       await editSessionMessage(interaction.client, session);
-      await interaction.reply(buildEphemeralNote('### Labs brief updated\nThe labs scene now reflects your new experiment brief draft.'));
+      await interaction.reply(buildEphemeralNote('### 🧪 Labs brief updated\nThe labs scene now reflects your new experiment brief draft.'));
       return;
     }
     default: {
-      await interaction.reply(buildEphemeralNote('### Unknown modal\nThat modal submission is not wired to a showcase outcome.'));
+      await interaction.reply(buildEphemeralNote('### ⚠️ Unknown modal\nThat modal submission is not wired to a showcase outcome.'));
     }
   }
 }

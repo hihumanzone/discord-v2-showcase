@@ -37,18 +37,18 @@ export function buildEphemeralNote(markdown) {
 
 export function buildOwnerOnlyMessage() {
   return buildEphemeralNote(
-    '### This session is locked to the original opener\nRun `/v2-showcase` yourself to start an independent interactive session.',
+    '### 🔒 This session is locked to the original opener\nRun `/v2-showcase` yourself to start an independent interactive session.',
   );
 }
 
 export function buildMissingSessionMessage() {
   return buildEphemeralNote(
-    '### This showcase session has expired\nLaunch `/v2-showcase` again to create a fresh interactive session.',
+    '### ⏳ This showcase session has expired\nLaunch `/v2-showcase` again to create a fresh interactive session.',
   );
 }
 
 export function buildRuntimeErrorMessage() {
   return buildEphemeralNote(
-    '### Something went wrong\nThe showcase hit an unexpected error while processing that interaction.',
+    '### ⚠️ Something went wrong\nThe showcase hit an unexpected error while processing that interaction.',
   );
 }

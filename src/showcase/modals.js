@@ -55,7 +55,7 @@ export function buildTourModal(session) {
   return validateModalPayload(
     new ModalBuilder()
       .setCustomId(cid('modal', session.id, 'tour-personalize'))
-      .setTitle('Personalize product tour')
+      .setTitle('✨ Personalize product tour')
       .addTextDisplayComponents(
         text('Adjust the hero copy and audience framing, then refresh the live public showcase message.'),
       )
@@ -81,7 +81,7 @@ export function buildBuilderAssistantModal(session) {
   return validateModalPayload(
     new ModalBuilder()
       .setCustomId(cid('modal', session.id, 'builder-assistant'))
-      .setTitle('Launch assistant')
+      .setTitle('🚀 Launch assistant')
       .addTextDisplayComponents(
         text('Use modal-native selects to refine the rollout with richer structured input.'),
       )
@@ -173,7 +173,7 @@ export function buildBugReportModal(session) {
   return validateModalPayload(
     new ModalBuilder()
       .setCustomId(cid('modal', session.id, 'bug-report'))
-      .setTitle('Submit bug report')
+      .setTitle('🐞 Submit bug report')
       .addTextDisplayComponents(
         text('This intake is structured like a practical support workflow: severity, summary, reproduction, and optional files.'),
       )
@@ -232,7 +232,7 @@ export function buildLabsModal(session) {
   return validateModalPayload(
     new ModalBuilder()
       .setCustomId(cid('modal', session.id, 'labs-compose'))
-      .setTitle('Compose labs brief')
+      .setTitle('🧪 Compose labs brief')
       .addTextDisplayComponents(
         text('Draft a short internal experiment brief and push it back into the live showcase.'),
       )

@@ -1,8 +1,8 @@
-# Discord Components V2 Showcase
+# ✨ Discord Components V2 Showcase
 
 A polished, production-ready showcase app for Discord Components V2 using `discord.js`.
 
-## What this project demonstrates
+## 📋 What this project demonstrates
 
 - Components V2 messages built without legacy `content` or embeds
 - Rich layouts using containers, sections, separators, media galleries, thumbnails, and file components
@@ -11,16 +11,16 @@ A polished, production-ready showcase app for Discord Components V2 using `disco
 - Realistic publish-style follow-ups and ephemeral interaction outcomes
 - A modular architecture with validation helpers, scene rendering, message builders, and interaction routing
 
-## Scenes
+## 🧭 Scenes
 
-- **Home** — polished entry view with visual overview, scene shortcuts, and a manifest file
-- **Product Tour** — hero storytelling, media gallery presentation, personalization modal, and teaser publishing
-- **Launch Builder** — message select menus plus a modal using user, role, mentionable, and channel selects
-- **Bug Desk** — structured bug intake with severity, text input, file upload, and a triage receipt
-- **Release Room** — readiness room with artifact delivery and public publish outcomes
-- **Labs** — a stable modal drafting workflow for concise experiment briefs
+- **🏠 Home** — polished entry view with visual overview, scene shortcuts, and a manifest file
+- **✨ Product Tour** — hero storytelling, media gallery presentation, personalization modal, and teaser publishing
+- **🚀 Launch Builder** — message select menus plus a modal using user, role, mentionable, and channel selects
+- **🐞 Bug Desk** — structured bug intake with severity, text input, file upload, and a triage receipt
+- **📦 Release Room** — readiness room with artifact delivery and public publish outcomes
+- **🧪 Labs** — a stable modal drafting workflow for concise experiment briefs
 
-## Project structure
+## 🧱 Project structure
 
 ```text
 assets/
@@ -47,7 +47,7 @@ src/
 .gitignore
 ```
 
-## Getting started
+## 🚀 Getting started
 
 1. Install dependencies
 
@@ -86,13 +86,13 @@ src/
 
 7. Run `/v2-showcase`
 
-## Production notes
+## ✅ Production notes
 
 - The bot resolves the application ID from the bot token, so `CLIENT_ID` is not required.
 - The command definition is restricted to guild contexts when the installed discord.js surface supports command contexts, with a safe fallback for older builder support.
 - The showcase validates its outgoing Components V2 payloads before sending them, which helps catch component-count and attachment-limit mistakes early.
 - Shared message assets are attached once to the main showcase message and only exposed through V2 components.
 
-## Asset strategy
+## 🗂️ Asset strategy
 
 Discord Components V2 attachments do not render automatically. A V2 message has to expose uploaded files through `Thumbnail`, `Media Gallery`, or `File` components. The main showcase therefore uploads a curated shared asset bundle once and reuses those attachments across scene switches.

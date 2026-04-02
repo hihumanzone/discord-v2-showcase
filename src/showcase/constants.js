@@ -8,12 +8,12 @@ export const SCENES = Object.freeze({
 });
 
 export const SCENE_TITLES = Object.freeze({
-  home: 'Home',
-  tour: 'Product Tour',
-  builder: 'Launch Builder',
-  bug: 'Bug Desk',
-  release: 'Release Room',
-  labs: 'Labs',
+  home: '🏠 Home',
+  tour: '✨ Product Tour',
+  builder: '🚀 Launch Builder',
+  bug: '🐞 Bug Desk',
+  release: '📦 Release Room',
+  labs: '🧪 Labs',
 });
 
 export const DOCS = Object.freeze({
