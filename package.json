@@ -1,0 +1,19 @@
+{
+  "name": "discord-components-v2-showcase",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "A polished, production-ready showcase app for Discord Components V2 using discord.js.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "verify": "node src/verify.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^16.4.7"
+  }
+}
