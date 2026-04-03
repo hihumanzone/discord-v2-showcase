@@ -1,18 +1,25 @@
-function format(scope, message) {
-  return `[${scope}] ${message}`;
+function stamp() {
+  return new Date().toISOString();
+}
+
+function write(level, scope, message, error) {
+  const prefix = `[${stamp()}] [${level}] [${scope}]`;
+  if (error) {
+    console.error(prefix, message, error);
+    return;
+  }
+
+  console.log(prefix, message);
 }
 
 export const logger = Object.freeze({
   info(scope, message) {
-    console.log(format(scope, message));
+    write('INFO', scope, message);
   },
   warn(scope, message) {
-    console.warn(format(scope, message));
+    write('WARN', scope, message);
   },
   error(scope, message, error) {
-    console.error(format(scope, message));
-    if (error) {
-      console.error(error);
-    }
+    write('ERROR', scope, message, error);
   },
 });

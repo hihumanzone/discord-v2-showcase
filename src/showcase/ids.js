@@ -1,22 +1,24 @@
-const PREFIX = 'sv2';
+// All interactive component custom IDs start with the same namespace.
+// That makes it easy to ignore unrelated buttons/select menus from other bots.
+const PREFIX = 'v2ref';
 
-export function cid(kind, sessionId, action) {
-  return `${PREFIX}:${kind}:${sessionId}:${action}`;
+export function createSessionId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function parseCid(customId) {
-  if (typeof customId !== 'string' || !customId.startsWith(`${PREFIX}:`)) {
-    return null;
-  }
+export function makeId(sessionId, kind, action) {
+  return `${PREFIX}:${sessionId}:${kind}:${action}`;
+}
 
-  const [prefix, kind, sessionId, ...actionParts] = customId.split(':');
-  if (prefix !== PREFIX || !kind || !sessionId || actionParts.length === 0) {
+export function parseId(customId) {
+  const [prefix, sessionId, kind, ...rest] = String(customId).split(':');
+  if (prefix !== PREFIX || !sessionId || !kind || rest.length === 0) {
     return null;
   }
 
   return {
-    kind,
     sessionId,
-    action: actionParts.join(':'),
+    kind,
+    action: rest.join(':'),
   };
 }

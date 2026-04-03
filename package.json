@@ -1,12 +1,8 @@
 {
-  "name": "discord-components-v2-showcase",
-  "version": "1.3.0",
-  "private": true,
+  "name": "discord-components-v2-reference",
+  "version": "1.0.0",
   "type": "module",
-  "description": "A polished, production-ready showcase app for Discord Components V2 using discord.js.",
-  "engines": {
-    "node": ">=22.0.0"
-  },
+  "description": "A beginner-friendly educational reference for Discord Display Message Components V2 using discord.js.",
   "scripts": {
     "start": "node src/index.js",
     "deploy": "node src/deploy-commands.js",

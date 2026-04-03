@@ -1,26 +1,53 @@
-# ✨ Discord Components V2 Showcase
+# 📘 Discord Components V2 Reference Bot
 
-A polished, production-ready showcase app for Discord Components V2 using `discord.js`.
+A simpler, beginner-friendly companion project for learning **Discord Display Message Components V2** with `discord.js`.
 
-## 📋 What this project demonstrates
+This version is intentionally written like an educational reference:
+- fewer files than the production showcase
+- heavier helper comments
+- scene renderers that are easy to read top-to-bottom
+- practical examples for both **message components** and **modal components**
 
-- Components V2 messages built without legacy `content` or embeds
-- Rich layouts using containers, sections, separators, media galleries, thumbnails, and file components
-- Stateful button and select-menu interactions inside one public showcase message
-- Modal flows using current modal-native patterns such as `Label`, `Text Display`, modal selects, text inputs, file uploads, radio groups, checkbox groups, and checkboxes
-- Realistic publish-style follow-ups and ephemeral interaction outcomes
-- A modular architecture with scene-specific renderers, payload validation helpers, message builders, and interaction routing
+## What this project teaches
 
-## 🧭 Scenes
+### Message-side Components V2
+- `TextDisplay`
+- `Section` with both **Thumbnail** and **Button** accessories
+- `Container`
+- `Separator`
+- `MediaGallery`
+- `File`
+- `ActionRow`
+- `Button`
+- `String Select`
+- `User Select`
+- `Role Select`
+- `Mentionable Select`
+- `Channel Select`
 
-- **🏠 Home** — polished entry view with visual overview, scene shortcuts, and a manifest file
-- **✨ Product Tour** — hero storytelling, media gallery presentation, personalization modal, and teaser publishing
-- **🚀 Launch Builder** — message select menus plus a modal using approver/channel selects and modal-native rollout controls
-- **🐞 Bug Desk** — structured bug intake with severity, text input, file upload, and a triage receipt
-- **📦 Release Room** — readiness room with artifact delivery and public publish outcomes
-- **🧪 Labs** — a stable modal drafting workflow for concise experiment briefs
+### Modal-side Components
+- `TextDisplay` inside a modal
+- `Label`
+- `TextInput`
+- `String Select` inside a modal
+- `User Select` inside a modal
+- `Role Select` inside a modal
+- `Mentionable Select` inside a modal
+- `Channel Select` inside a modal
+- `File Upload`
+- `Radio Group`
+- `Checkbox Group`
+- `Checkbox`
 
-## 🧱 Project structure
+## Scenes
+
+- **🏠 Home** — quick overview and the core rules for Components V2
+- **🧱 Layouts** — layout and content components working together
+- **🎛️ Interactions** — buttons and all supported message select menus
+- **🪟 Modals** — three teaching modals covering the modal component surface
+- **🚀 Workflow** — updates, follow-ups, state changes, and attached file display
+
+## Project structure
 
 ```text
 assets/
@@ -33,30 +60,16 @@ src/
   verify.js
   showcase/
     assets.js
-    constants.js
-    helpers.js
     ids.js
-    messages.js
     modals.js
-    primitives.js
-    responses.js
     router.js
-    sessions.js
+    scenes.js
+    state.js
+    utils.js
     validation.js
-    scenes/
-      bug.js
-      builder.js
-      home.js
-      index.js
-      labs.js
-      navigation.js
-      release.js
-      shared.js
-      tour.js
-.gitignore
 ```
 
-## 🚀 Getting started
+## Getting started
 
 1. Install dependencies
 
@@ -64,17 +77,13 @@ src/
    npm install
    ```
 
-2. Copy the environment template
+2. Copy the example environment file
 
    ```bash
    cp .env.example .env
    ```
 
-3. Fill in `BOT_TOKEN`
-
-   - `GUILD_ID` is optional and recommended for faster development deploys
-   - When `GUILD_ID` is set, the bot keeps `/v2-showcase` only in that guild and removes duplicate registrations outside that scope during automatic startup deployment
-   - `AUTO_DEPLOY_COMMANDS` defaults to `true`
+3. Add your bot token to `.env`
 
 4. Start the bot
 
@@ -82,27 +91,42 @@ src/
    npm start
    ```
 
-5. Optional manual deploy
+5. Run the command
 
-   ```bash
-   npm run deploy
+   ```text
+   /v2-reference
    ```
 
-6. Optional local verification
+## Command deployment
 
-   ```bash
-   npm run verify
-   ```
+- `BOT_TOKEN` is the only required environment variable.
+- `GUILD_ID` is optional and is useful during development.
+- If `GUILD_ID` is set, `/v2-reference` is registered in that guild only.
+- If `GUILD_ID` is not set, `/v2-reference` is registered globally.
+- `AUTO_DEPLOY_COMMANDS=true` is enabled by default.
 
-7. Run `/v2-showcase`
+## Notes for learners
 
-## ✅ Production notes
+### Why there is no `content` field
+Components V2 messages should use components for all message content. That is why this project uses `TextDisplay`, `Section`, and `Container` instead of the legacy `content` or `embeds` fields.
 
-- The bot resolves the application ID from the bot token, so `CLIENT_ID` is not required.
-- Command deployment is single-scope: with `GUILD_ID` it keeps `/v2-showcase` only in that guild; without `GUILD_ID` it keeps `/v2-showcase` global and removes duplicate guild copies during automatic startup deployment.
-- The showcase validates outgoing Components V2 payloads before sending them, including message/modal structure, action row rules, duplicate `custom_id` detection, attachment limits, and component-count limits.
-- Shared message assets are attached once to the main showcase message and only exposed through V2 components.
+### Why some modal controls use raw objects
+At the time this project was assembled, Discord documents `Radio Group`, `Checkbox Group`, and `Checkbox` as supported modal components. Builder coverage in libraries can lag behind the API, so this reference keeps those pieces close to the documented wire format rather than inventing unsupported builders.
 
-## 🗂️ Asset strategy
+### Why there is a validator
+Discord rejects invalid component trees. This project includes a small validator that catches the most common mistakes locally:
+- more than 40 total message components
+- more than 10 attachments
+- invalid action row shapes
+- invalid section, container, and label children
+- duplicate `custom_id` values
 
-Discord Components V2 attachments do not render automatically. A V2 message has to expose uploaded files through `Thumbnail`, `Media Gallery`, or `File` components. The main showcase therefore uploads a curated shared asset bundle once and reuses those attachments across scene switches.
+## Local verification
+
+Run:
+
+```bash
+npm run verify
+```
+
+This builds each scene and modal in memory and validates their structure. It does **not** replace a real bot test in Discord, but it is useful while editing the project.

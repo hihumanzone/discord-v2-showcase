@@ -1,113 +1,61 @@
-import { commandData } from './commands.js';
-import { SCENES } from './showcase/constants.js';
 import {
-  buildBugReceiptMessage,
-  buildLabsPublishMessage,
-  buildMainShowcaseMessage,
-  buildReleasePublishMessage,
-  buildTourPublishMessage,
-} from './showcase/messages.js';
+  buildMainMessage,
+  buildPublicWorkflowPost,
+  SCENES,
+} from './showcase/scenes.js';
 import {
-  buildBugReportModal,
-  buildBuilderAssistantModal,
-  buildLabsModal,
-  buildTourModal,
+  buildFeedbackModal,
+  buildRoutingModal,
+  buildGuidedNoteModal,
 } from './showcase/modals.js';
-import { sessionStore } from './showcase/sessions.js';
+import { createSession } from './showcase/state.js';
 import {
   summarizeMessagePayload,
   summarizeModalPayload,
+  validateModalPayload,
+  validateV2MessagePayload,
 } from './showcase/validation.js';
 
-function createSession(scene) {
-  return sessionStore.create({
-    ownerId: '123456789012345678',
-    channelId: '223456789012345678',
-    guildId: '323456789012345678',
-    scene,
-  });
+function logSummary(label, summary) {
+  console.log(`${label}:`, JSON.stringify(summary));
 }
 
-function seedBuilderState(session) {
-  session.builder.channels = ['#announcements', '#beta-ship', '#ops'];
-  session.builder.roles = ['@Launch Lead', '@QA', '@Support'];
-  session.builder.reviewers = ['Avery', 'Mina', 'Sol'];
-  session.builder.owners = ['@Ops', 'Iris'];
-  session.builder.modalApprovers = ['Avery', 'Mina'];
-  session.builder.modalChannels = ['#announcements', '#beta-ship'];
-  session.builder.modalPosture = 'staged';
-  session.builder.modalPostureLabel = 'Staged ramp';
-  session.builder.modalPackageValues = ['release-notes', 'qa-checklist', 'analytics-snapshot'];
-  session.builder.modalPackageLabels = ['Release notes', 'QA checklist', 'Analytics snapshot'];
-  session.builder.modalLiveWatch = true;
-  session.builder.previewGenerated = true;
+const session = createSession('verify-user', SCENES.home);
+session.interactions.stringChoice = 'compact';
+session.interactions.userChoices = ['123'];
+session.interactions.roleChoices = ['456'];
+session.interactions.mentionableChoices = ['123', '456'];
+session.interactions.channelChoices = ['789'];
+session.modals.feedback.title = 'Educational reference';
+session.modals.feedback.audience = 'developers';
+session.modals.feedback.mode = 'guided';
+session.modals.feedback.features = ['media', 'files'];
+session.modals.feedback.confirmed = true;
+session.modals.routing.approvers = ['Alice'];
+session.modals.routing.roles = ['QA'];
+session.modals.routing.mentions = ['Alice', '@QA'];
+session.modals.routing.channels = ['#ship-room'];
+session.modals.routing.uploadedFiles = ['bug.png'];
+session.modals.note = 'Text Display works inside modals too.';
+session.workflow.stage = 'published';
+session.workflow.publishCount = 1;
+
+for (const scene of Object.values(SCENES)) {
+  session.scene = scene;
+  const message = buildMainMessage(session);
+  validateV2MessagePayload(message, `${scene} scene`);
+  logSummary(`${scene} scene`, summarizeMessagePayload(message));
 }
 
-function seedBugState(session) {
-  session.bug.severityValue = 'high';
-  session.bug.severityLabel = 'High';
-  session.bug.summary = 'Severity picker does not persist after a modal submit.';
-  session.bug.reproduction = 'Open the bug report modal, submit a report, then return to the main message.';
-  session.bug.uploadedFileNames = ['bug.png', 'logs.txt'];
+for (const [label, modal] of [
+  ['feedback modal', buildFeedbackModal(session)],
+  ['routing modal', buildRoutingModal(session)],
+  ['guided note modal', buildGuidedNoteModal(session)],
+]) {
+  validateModalPayload(modal, label);
+  logSummary(label, summarizeModalPayload(modal));
 }
 
-function seedLabsState(session) {
-  session.labs.tone = 'balanced';
-  session.labs.toneLabel = 'Balanced';
-  session.labs.headline = 'Experiment brief';
-  session.labs.notes = 'Smoke test complete.';
-  session.labs.publishedCount = 1;
-}
-
-function verifyMainMessages() {
-  console.log(`Commands: ${commandData.length}`);
-
-  for (const scene of Object.values(SCENES)) {
-    const session = createSession(scene);
-
-    if (scene === SCENES.builder) {
-      seedBuilderState(session);
-    }
-
-    if (scene === SCENES.bug) {
-      seedBugState(session);
-    }
-
-    if (scene === SCENES.labs) {
-      seedLabsState(session);
-    }
-
-    const payload = buildMainShowcaseMessage(session, { includeFiles: true });
-    console.log(`Scene ${scene}:`, summarizeMessagePayload(payload));
-  }
-}
-
-function verifyModals() {
-  const session = createSession(SCENES.builder);
-  seedBuilderState(session);
-  seedLabsState(session);
-  seedBugState(session);
-
-  console.log('Tour modal:', summarizeModalPayload(buildTourModal(session)));
-  console.log('Builder modal:', summarizeModalPayload(buildBuilderAssistantModal(session)));
-  console.log('Bug modal:', summarizeModalPayload(buildBugReportModal(session)));
-  console.log('Labs modal:', summarizeModalPayload(buildLabsModal(session)));
-}
-
-function verifyFollowUps() {
-  const session = createSession(SCENES.release);
-  session.tour.publishedCount = 1;
-  session.release.publishedCount = 1;
-  seedLabsState(session);
-  seedBugState(session);
-
-  console.log('Bug receipt:', summarizeMessagePayload(buildBugReceiptMessage(session)));
-  console.log('Tour publish:', summarizeMessagePayload(buildTourPublishMessage(session)));
-  console.log('Release publish:', summarizeMessagePayload(buildReleasePublishMessage(session)));
-  console.log('Labs publish:', summarizeMessagePayload(buildLabsPublishMessage(session)));
-}
-
-verifyMainMessages();
-verifyModals();
-verifyFollowUps();
-console.log('Verification completed.');
+const workflowPost = buildPublicWorkflowPost(session);
+validateV2MessagePayload(workflowPost, 'workflow post');
+logSummary('workflow post', summarizeMessagePayload(workflowPost));

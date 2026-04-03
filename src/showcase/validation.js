@@ -1,3 +1,6 @@
+// This file is intentionally verbose: it doubles as a checklist for the rules
+// most people trip over while learning Components V2.
+
 const MESSAGE_ATTACHMENT_LIMIT = 10;
 const MESSAGE_COMPONENT_LIMIT = 40;
 const MODAL_TOP_LEVEL_LIMIT = 5;
@@ -55,44 +58,12 @@ const LABEL_CHILD_TYPES = new Set([
   ComponentType.Checkbox,
 ]);
 
-function serialize(value) {
-  if (value && typeof value.toJSON === 'function') {
-    return value.toJSON();
+function toJson(component) {
+  if (component && typeof component.toJSON === 'function') {
+    return component.toJSON();
   }
 
-  return value;
-}
-
-function countComponents(components) {
-  let total = 0;
-
-  function visit(component) {
-    const json = serialize(component);
-    if (!json) {
-      return;
-    }
-
-    total += 1;
-
-    if (Array.isArray(json.components)) {
-      json.components.forEach(visit);
-    }
-
-    if (json.accessory) {
-      visit(json.accessory);
-    }
-
-    if (Array.isArray(json.items)) {
-      json.items.forEach(visit);
-    }
-
-    if (json.component) {
-      visit(json.component);
-    }
-  }
-
-  components.forEach(visit);
-  return total;
+  return component;
 }
 
 function assert(condition, message) {
@@ -101,44 +72,76 @@ function assert(condition, message) {
   }
 }
 
+function countComponents(components) {
+  let total = 0;
+
+  function walk(component) {
+    const json = toJson(component);
+    if (!json) {
+      return;
+    }
+
+    total += 1;
+
+    if (Array.isArray(json.components)) {
+      json.components.forEach(walk);
+    }
+
+    if (json.accessory) {
+      walk(json.accessory);
+    }
+
+    if (Array.isArray(json.items)) {
+      json.items.forEach(walk);
+    }
+
+    if (json.component) {
+      walk(json.component);
+    }
+  }
+
+  components.forEach(walk);
+  return total;
+}
+
 function validateCustomId(component, seenCustomIds, label) {
   if (typeof component.custom_id !== 'string') {
     return;
   }
 
-  assert(component.custom_id.length >= 1 && component.custom_id.length <= 100, `${label} uses an invalid custom_id length.`);
+  assert(component.custom_id.length >= 1 && component.custom_id.length <= 100, `${label} contains a component with an invalid custom_id length.`);
   assert(!seenCustomIds.has(component.custom_id), `${label} reuses the custom_id ${component.custom_id}.`);
   seenCustomIds.add(component.custom_id);
 }
 
 function validateActionRow(component, label) {
   const children = component.components ?? [];
-  assert(children.length >= 1 && children.length <= 5, `${label} has an action row with an invalid number of child components.`);
+  assert(children.length >= 1 && children.length <= 5, `${label} has an action row with an invalid child count.`);
 
   const childTypes = new Set(children.map((child) => child.type));
   const hasButtons = childTypes.has(ComponentType.Button);
-  const hasSelects = [...childTypes].some((type) => MESSAGE_SELECT_TYPES.has(type));
+  const hasSelect = [...childTypes].some((type) => MESSAGE_SELECT_TYPES.has(type));
 
-  assert(!(hasButtons && hasSelects), `${label} mixes buttons and select menus in the same action row.`);
+  assert(!(hasButtons && hasSelect), `${label} mixes buttons and select menus in the same action row.`);
 
   if (hasButtons) {
-    assert([...childTypes].every((type) => type === ComponentType.Button), `${label} has a non-button component in a button action row.`);
+    assert([...childTypes].every((type) => type === ComponentType.Button), `${label} has a non-button child inside a button row.`);
   }
 
-  if (hasSelects) {
-    assert(children.length === 1, `${label} has more than one select menu in a single action row.`);
-    assert(MESSAGE_SELECT_TYPES.has(children[0].type), `${label} uses an unsupported select in an action row.`);
+  if (hasSelect) {
+    assert(children.length === 1, `${label} uses more than one select in a single action row.`);
+    assert(MESSAGE_SELECT_TYPES.has(children[0].type), `${label} uses an unsupported select menu in an action row.`);
   }
 }
 
 function validateSection(component, label) {
   const children = component.components ?? [];
-  assert(children.length >= 1 && children.length <= 3, `${label} has a section with an invalid number of text display children.`);
+  assert(children.length >= 1 && children.length <= 3, `${label} has a section with an invalid number of text blocks.`);
   assert(children.every((child) => child.type === ComponentType.TextDisplay), `${label} has a section with a non-Text Display child.`);
   assert(component.accessory, `${label} has a section without an accessory.`);
   assert(
     component.accessory.type === ComponentType.Button || component.accessory.type === ComponentType.Thumbnail,
-    `${label} has a section with an unsupported accessory type.`,
+    `${label} has a section with an invalid accessory type.`,
   );
 }
 
@@ -149,12 +152,12 @@ function validateContainer(component, label) {
 }
 
 function validateLabel(component, label) {
-  assert(component.component, `${label} has a label without a child component.`);
+  assert(component.component, `${label} has a label without a wrapped component.`);
   assert(LABEL_CHILD_TYPES.has(component.component.type), `${label} has a label with an unsupported child component.`);
 }
 
-function validateComponentTree(component, seenCustomIds, label) {
-  const json = serialize(component);
+function validateTree(component, seenCustomIds, label) {
+  const json = toJson(component);
   if (!json) {
     return;
   }
@@ -179,29 +182,29 @@ function validateComponentTree(component, seenCustomIds, label) {
   }
 
   if (Array.isArray(json.components)) {
-    json.components.forEach((child) => validateComponentTree(child, seenCustomIds, label));
+    json.components.forEach((child) => validateTree(child, seenCustomIds, label));
   }
 
   if (json.accessory) {
-    validateComponentTree(json.accessory, seenCustomIds, label);
+    validateTree(json.accessory, seenCustomIds, label);
   }
 
   if (Array.isArray(json.items)) {
-    json.items.forEach((item) => validateComponentTree(item, seenCustomIds, label));
+    json.items.forEach((child) => validateTree(child, seenCustomIds, label));
   }
 
   if (json.component) {
-    validateComponentTree(json.component, seenCustomIds, label);
+    validateTree(json.component, seenCustomIds, label);
   }
 }
 
 export function validateV2MessagePayload(payload, label = 'message payload') {
   if (payload.content != null) {
-    throw new Error(`${label} must not use content when sending Components V2.`);
+    throw new Error(`${label} must not use content in a Components V2 message.`);
   }
 
   if (payload.embeds?.length) {
-    throw new Error(`${label} must not use embeds when sending Components V2.`);
+    throw new Error(`${label} must not use embeds in a Components V2 message.`);
   }
 
   if ((payload.files?.length ?? 0) > MESSAGE_ATTACHMENT_LIMIT) {
@@ -209,7 +212,7 @@ export function validateV2MessagePayload(payload, label = 'message payload') {
   }
 
   const seenCustomIds = new Set();
-  (payload.components ?? []).forEach((component) => validateComponentTree(component, seenCustomIds, label));
+  (payload.components ?? []).forEach((component) => validateTree(component, seenCustomIds, label));
 
   const totalComponents = countComponents(payload.components ?? []);
   if (totalComponents > MESSAGE_COMPONENT_LIMIT) {
@@ -220,25 +223,20 @@ export function validateV2MessagePayload(payload, label = 'message payload') {
 }
 
 export function validateModalPayload(modal, label = 'modal payload') {
-  const json = serialize(modal);
+  const json = toJson(modal);
   const topLevel = json.components?.length ?? 0;
 
-  if (topLevel === 0) {
-    throw new Error(`${label} must include at least one top-level component.`);
-  }
-
-  if (topLevel > MODAL_TOP_LEVEL_LIMIT) {
-    throw new Error(`${label} uses ${topLevel} top-level components, but modals should stay within ${MODAL_TOP_LEVEL_LIMIT}.`);
-  }
+  assert(topLevel >= 1, `${label} must have at least one top-level modal component.`);
+  assert(topLevel <= MODAL_TOP_LEVEL_LIMIT, `${label} uses ${topLevel} top-level components, but modals should stay within ${MODAL_TOP_LEVEL_LIMIT}.`);
 
   const seenCustomIds = new Set();
   for (const component of json.components ?? []) {
-    const entry = serialize(component);
+    const entry = toJson(component);
     assert(
       entry.type === ComponentType.TextDisplay || entry.type === ComponentType.Label,
-      `${label} uses an unsupported top-level modal component type.`,
+      `${label} has an unsupported top-level modal component.`,
     );
-    validateComponentTree(entry, seenCustomIds, label);
+    validateTree(entry, seenCustomIds, label);
   }
 
   return modal;
@@ -253,7 +251,7 @@ export function summarizeMessagePayload(payload) {
 }
 
 export function summarizeModalPayload(modal) {
-  const json = serialize(modal);
+  const json = toJson(modal);
   return {
     topLevelComponents: json.components?.length ?? 0,
     totalComponents: countComponents(json.components ?? []),

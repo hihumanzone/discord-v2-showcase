@@ -3,24 +3,50 @@ import {
   ChannelType,
   FileUploadBuilder,
   LabelBuilder,
+  MentionableSelectMenuBuilder,
   ModalBuilder,
+  RoleSelectMenuBuilder,
   StringSelectMenuBuilder,
+  TextDisplayBuilder,
   TextInputBuilder,
   TextInputStyle,
   UserSelectMenuBuilder,
 } from 'discord.js';
 
-import {
-  AUDIENCE_OPTIONS,
-  BUILDER_PACKAGE_OPTIONS,
-  BUILDER_POSTURE_OPTIONS,
-  FIELD_IDS,
-  LAB_TONE_OPTIONS,
-  SEVERITY_OPTIONS,
-} from './constants.js';
-import { cid } from './ids.js';
-import { text } from './primitives.js';
+import { makeId } from './ids.js';
 import { validateModalPayload } from './validation.js';
+
+export const FIELD_IDS = Object.freeze({
+  feedbackTitle: 'feedback_title',
+  feedbackAudience: 'feedback_audience',
+  feedbackMode: 'feedback_mode',
+  feedbackFeatures: 'feedback_features',
+  feedbackConfirmed: 'feedback_confirmed',
+  routingUsers: 'routing_users',
+  routingRoles: 'routing_roles',
+  routingMentions: 'routing_mentions',
+  routingChannels: 'routing_channels',
+  routingFiles: 'routing_files',
+  guidedNote: 'guided_note',
+});
+
+export const FEEDBACK_AUDIENCE_OPTIONS = Object.freeze([
+  { label: 'Developers', value: 'developers', description: 'People learning the API directly' },
+  { label: 'Designers', value: 'designers', description: 'People reviewing layout patterns' },
+  { label: 'Moderators', value: 'moderators', description: 'People focused on operational workflows' },
+]);
+
+export const FEEDBACK_MODE_OPTIONS = Object.freeze([
+  { label: 'Guided', value: 'guided', description: 'Teach with extra explanation' },
+  { label: 'Balanced', value: 'balanced', description: 'Explain only the important parts' },
+  { label: 'Minimal', value: 'minimal', description: 'Show the smallest valid pattern' },
+]);
+
+export const FEATURE_OPTIONS = Object.freeze([
+  { label: 'Media galleries', value: 'media', description: 'Show image-rich layouts' },
+  { label: 'File components', value: 'files', description: 'Expose attached markdown and assets' },
+  { label: 'Select menus', value: 'selects', description: 'Show interactive filtering choices' },
+]);
 
 function rawLabel(label, description, component) {
   return {
@@ -31,11 +57,13 @@ function rawLabel(label, description, component) {
   };
 }
 
-function rawRadioGroup(customId, options, selectedValue, required = true) {
+// discord.js may not yet expose first-class builders for every new modal control.
+// These helpers stay close to the documented Discord API payload shape.
+function rawRadioGroup(customId, options, selectedValue) {
   return {
     type: 21,
     custom_id: customId,
-    required,
+    required: true,
     options: options.map((option) => ({
       value: option.value,
       label: option.label,
@@ -45,11 +73,13 @@ function rawRadioGroup(customId, options, selectedValue, required = true) {
   };
 }
 
-function rawCheckboxGroup(customId, options, selectedValues, required = false) {
+function rawCheckboxGroup(customId, options, selectedValues) {
   return {
     type: 22,
     custom_id: customId,
-    required,
+    required: false,
+    min_values: 0,
+    max_values: options.length,
     options: options.map((option) => ({
       value: option.value,
       label: option.label,
@@ -59,238 +89,149 @@ function rawCheckboxGroup(customId, options, selectedValues, required = false) {
   };
 }
 
-function rawCheckbox(customId, selected) {
+function rawCheckbox(customId, checked) {
   return {
     type: 23,
     custom_id: customId,
-    ...(selected ? { default: true } : {}),
+    ...(checked ? { default: true } : {}),
   };
 }
 
-export function buildTourModal(session) {
-  const audienceSelect = new StringSelectMenuBuilder()
-    .setCustomId(FIELD_IDS.tourAudience)
-    .setPlaceholder('Choose a launch audience')
-    .setMinValues(1)
-    .setMaxValues(1)
-    .setRequired(true)
-    .addOptions(
-      AUDIENCE_OPTIONS.map((option) => ({
-        ...option,
-        default: option.value === session.tour.audience,
-      })),
-    );
-
-  const nameInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.tourName)
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder('Display Components V2')
-    .setRequired(true)
-    .setMaxLength(60)
-    .setValue(session.tour.productName);
-
-  const highlightInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.tourHighlight)
-    .setStyle(TextInputStyle.Paragraph)
-    .setPlaceholder('What should the hero panel emphasize?')
-    .setRequired(true)
-    .setMaxLength(400)
-    .setValue(session.tour.highlight);
-
-  return validateModalPayload(
-    new ModalBuilder()
-      .setCustomId(cid('modal', session.id, 'tour-personalize'))
-      .setTitle('✨ Personalize product tour')
-      .addTextDisplayComponents(
-        text('Adjust the hero copy and audience framing, then refresh the live public showcase message.'),
-      )
-      .addLabelComponents(
-        new LabelBuilder()
-          .setLabel('Audience')
-          .setDescription('Who should this tour feel optimized for?')
-          .setStringSelectMenuComponent(audienceSelect),
-        new LabelBuilder()
-          .setLabel('Product name')
-          .setDescription('This becomes the main hero title.')
-          .setTextInputComponent(nameInput),
-        new LabelBuilder()
-          .setLabel('Highlight line')
-          .setDescription('A short premium-value statement for the hero card.')
-          .setTextInputComponent(highlightInput),
+export function buildFeedbackModal(session) {
+  const modal = {
+    custom_id: makeId(session.id, 'modal', 'feedback'),
+    title: '🪟 Modal survey',
+    components: [
+      rawLabel(
+        'Project title',
+        'A short headline for the teaching example.',
+        new TextInputBuilder()
+          .setCustomId(FIELD_IDS.feedbackTitle)
+          .setStyle(TextInputStyle.Short)
+          .setRequired(true)
+          .setMaxLength(80)
+          .setValue(session.modals.feedback.title)
+          .toJSON(),
       ),
-    'tour modal',
-  );
+      rawLabel(
+        'Audience',
+        'A String Select can also live inside a modal when wrapped by a Label.',
+        new StringSelectMenuBuilder()
+          .setCustomId(FIELD_IDS.feedbackAudience)
+          .setPlaceholder('Choose an audience')
+          .setRequired(true)
+          .setMinValues(1)
+          .setMaxValues(1)
+          .addOptions(
+            FEEDBACK_AUDIENCE_OPTIONS.map((option) => ({
+              ...option,
+              default: option.value === session.modals.feedback.audience,
+            })),
+          )
+          .toJSON(),
+      ),
+      rawLabel(
+        'Teaching mode',
+        'Radio Group is a single-choice control that is available only in modals.',
+        rawRadioGroup(FIELD_IDS.feedbackMode, FEEDBACK_MODE_OPTIONS, session.modals.feedback.mode),
+      ),
+      rawLabel(
+        'Feature checklist',
+        'Checkbox Group is the multi-select modal companion to Radio Group.',
+        rawCheckboxGroup(FIELD_IDS.feedbackFeatures, FEATURE_OPTIONS, session.modals.feedback.features),
+      ),
+      rawLabel(
+        'Ready to publish?',
+        'Checkbox is the simplest yes/no modal control.',
+        rawCheckbox(FIELD_IDS.feedbackConfirmed, session.modals.feedback.confirmed),
+      ),
+    ],
+  };
+
+  return validateModalPayload(modal, 'feedback modal');
 }
 
-export function buildBuilderAssistantModal(session) {
-  return validateModalPayload(
-    {
-      custom_id: cid('modal', session.id, 'builder-assistant'),
-      title: '🚀 Launch assistant',
-      components: [
-        rawLabel(
-          'Approvers',
-          'Who must explicitly sign off before launch?',
+export function buildRoutingModal(session) {
+  const modal = new ModalBuilder()
+    .setCustomId(makeId(session.id, 'modal', 'routing'))
+    .setTitle('📬 Routing modal')
+    .addLabelComponents(
+      new LabelBuilder()
+        .setLabel('Approvers')
+        .setDescription('User Select inside a modal.')
+        .setUserSelectMenuComponent(
           new UserSelectMenuBuilder()
-            .setCustomId(FIELD_IDS.builderApprovers)
-            .setPlaceholder('Select approvers')
+            .setCustomId(FIELD_IDS.routingUsers)
             .setRequired(false)
             .setMinValues(0)
-            .setMaxValues(3)
-            .toJSON(),
+            .setMaxValues(2),
         ),
-        rawLabel(
-          'Announcement channels',
-          'Pick the launch rooms that should receive the main update.',
+      new LabelBuilder()
+        .setLabel('Roles')
+        .setDescription('Role Select inside a modal.')
+        .setRoleSelectMenuComponent(
+          new RoleSelectMenuBuilder()
+            .setCustomId(FIELD_IDS.routingRoles)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(2),
+        ),
+      new LabelBuilder()
+        .setLabel('Mentionables')
+        .setDescription('Mentionable Select inside a modal.')
+        .setMentionableSelectMenuComponent(
+          new MentionableSelectMenuBuilder()
+            .setCustomId(FIELD_IDS.routingMentions)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(3),
+        ),
+      new LabelBuilder()
+        .setLabel('Channels')
+        .setDescription('Channel Select inside a modal.')
+        .setChannelSelectMenuComponent(
           new ChannelSelectMenuBuilder()
-            .setCustomId(FIELD_IDS.builderChannels)
-            .setPlaceholder('Select channels')
-            .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+            .setCustomId(FIELD_IDS.routingChannels)
             .setRequired(false)
             .setMinValues(0)
-            .setMaxValues(3)
-            .toJSON(),
+            .setMaxValues(2)
+            .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement),
         ),
-        rawLabel(
-          'Rollout posture',
-          'Choose the overall shipping style for this launch.',
-          rawRadioGroup(FIELD_IDS.builderPosture, BUILDER_POSTURE_OPTIONS, session.builder.modalPosture),
+      new LabelBuilder()
+        .setLabel('Supporting files')
+        .setDescription('File Upload inside a modal.')
+        .setFileUploadComponent(
+          new FileUploadBuilder()
+            .setCustomId(FIELD_IDS.routingFiles)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(2),
         ),
-        rawLabel(
-          'Publish package',
-          'Select the handoff artifacts to include with the release.',
-          rawCheckboxGroup(
-            FIELD_IDS.builderPackage,
-            BUILDER_PACKAGE_OPTIONS,
-            session.builder.modalPackageValues,
-            false,
-          ),
-        ),
-        rawLabel(
-          'Live watch window',
-          'Keep a post-launch monitoring thread active after publish.',
-          rawCheckbox(FIELD_IDS.builderLiveWatch, session.builder.modalLiveWatch),
-        ),
-      ],
-    },
-    'builder assistant modal',
-  );
-}
-
-export function buildBugReportModal(session) {
-  const severityMenu = new StringSelectMenuBuilder()
-    .setCustomId(FIELD_IDS.bugSeverity)
-    .setPlaceholder('Choose severity')
-    .setRequired(true)
-    .setMinValues(1)
-    .setMaxValues(1)
-    .addOptions(
-      SEVERITY_OPTIONS.map((option) => ({
-        ...option,
-        default: option.value === session.bug.severityValue,
-      })),
     );
 
-  const summaryInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.bugSummary)
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true)
-    .setMaxLength(100)
-    .setPlaceholder('A concise one-line bug summary');
-
-  const reproductionInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.bugReproduction)
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true)
-    .setMaxLength(1200)
-    .setPlaceholder('What happened? What should have happened? How can it be reproduced?');
-
-  const fileUpload = new FileUploadBuilder()
-    .setCustomId(FIELD_IDS.bugFiles)
-    .setRequired(false)
-    .setMinValues(0)
-    .setMaxValues(3);
-
-  return validateModalPayload(
-    new ModalBuilder()
-      .setCustomId(cid('modal', session.id, 'bug-report'))
-      .setTitle('🐞 Submit bug report')
-      .addTextDisplayComponents(
-        text('This intake is structured like a practical support workflow: severity, summary, reproduction, and optional files.'),
-      )
-      .addLabelComponents(
-        new LabelBuilder()
-          .setLabel('Severity')
-          .setDescription('How risky is this issue for the launch?')
-          .setStringSelectMenuComponent(severityMenu),
-        new LabelBuilder()
-          .setLabel('Summary')
-          .setDescription('One line that triage can scan quickly.')
-          .setTextInputComponent(summaryInput),
-        new LabelBuilder()
-          .setLabel('Reproduction')
-          .setDescription('Provide enough detail for a teammate to replay the issue.')
-          .setTextInputComponent(reproductionInput),
-        new LabelBuilder()
-          .setLabel('Supporting files')
-          .setDescription('Optional screenshots or logs.')
-          .setFileUploadComponent(fileUpload),
-      ),
-    'bug report modal',
-  );
+  return validateModalPayload(modal, 'routing modal');
 }
 
-export function buildLabsModal(session) {
-  const toneMenu = new StringSelectMenuBuilder()
-    .setCustomId(FIELD_IDS.labsTone)
-    .setPlaceholder('Choose an experiment tone')
-    .setRequired(true)
-    .setMinValues(1)
-    .setMaxValues(1)
-    .addOptions(
-      LAB_TONE_OPTIONS.map((option) => ({
-        ...option,
-        default: option.value === session.labs.tone,
-      })),
+export function buildGuidedNoteModal(session) {
+  const modal = new ModalBuilder()
+    .setCustomId(makeId(session.id, 'modal', 'note'))
+    .setTitle('📝 Guided note modal')
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent('This line is a **Text Display** inside a modal. Use it for instructions, context, or a small teaching note.'),
+    )
+    .addLabelComponents(
+      new LabelBuilder()
+        .setLabel('Quick note')
+        .setDescription('A single Text Input paired with the modal Text Display above.')
+        .setTextInputComponent(
+          new TextInputBuilder()
+            .setCustomId(FIELD_IDS.guidedNote)
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true)
+            .setMaxLength(300)
+            .setValue(session.modals.note ?? 'Text Display makes modal instructions easier to read.'),
+        ),
     );
 
-  const headlineInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.labsHeadline)
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true)
-    .setMaxLength(100)
-    .setPlaceholder('Headline for the short experiment brief')
-    .setValue(session.labs.headline ?? '');
-
-  const notesInput = new TextInputBuilder()
-    .setCustomId(FIELD_IDS.labsNotes)
-    .setStyle(TextInputStyle.Paragraph)
-    .setRequired(false)
-    .setMaxLength(500)
-    .setPlaceholder('Optional notes, risks, or next actions')
-    .setValue(session.labs.notes ?? '');
-
-  return validateModalPayload(
-    new ModalBuilder()
-      .setCustomId(cid('modal', session.id, 'labs-compose'))
-      .setTitle('🧪 Compose labs brief')
-      .addTextDisplayComponents(
-        text('Draft a short internal experiment brief and push it back into the live showcase.'),
-      )
-      .addLabelComponents(
-        new LabelBuilder()
-          .setLabel('Tone')
-          .setDescription('How should the brief read?')
-          .setStringSelectMenuComponent(toneMenu),
-        new LabelBuilder()
-          .setLabel('Headline')
-          .setDescription('The first line of the brief.')
-          .setTextInputComponent(headlineInput),
-        new LabelBuilder()
-          .setLabel('Notes')
-          .setDescription('Optional context for reviewers.')
-          .setTextInputComponent(notesInput),
-      ),
-    'labs modal',
-  );
+  return validateModalPayload(modal, 'guided note modal');
 }
