@@ -35,16 +35,26 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 
   try {
-    const result = await deployCommands();
+    const result = await deployCommands({
+      guildIds: [...readyClient.guilds.cache.keys()],
+    });
+
     if (result.scope === 'guild') {
       logger.info('deploy', `Deployed ${SHOWCASE_COMMAND_NAME} to guild ${result.target}`);
-      if (result.removedGlobalDuplicates > 0) {
-        logger.info('deploy', `Removed ${result.removedGlobalDuplicates} global duplicate command registration(s).`);
-      }
-      return;
+    } else {
+      logger.info('deploy', `Deployed ${SHOWCASE_COMMAND_NAME} globally`);
     }
 
-    logger.info('deploy', `Deployed ${SHOWCASE_COMMAND_NAME} globally`);
+    if (result.removedGlobalCommands > 0) {
+      logger.info('deploy', `Removed ${result.removedGlobalCommands} duplicate global ${SHOWCASE_COMMAND_NAME} registration(s).`);
+    }
+
+    if (result.cleanedGuilds.length > 0) {
+      logger.info(
+        'deploy',
+        `Removed duplicate ${SHOWCASE_COMMAND_NAME} registration(s) from ${result.cleanedGuilds.length} guild(s) outside the active scope.`,
+      );
+    }
   } catch (error) {
     logger.error('deploy', 'Automatic command deployment failed.', error);
   }

@@ -5,7 +5,7 @@ import { ACCENTS, DOCS, LAB_TONE_OPTIONS, SCENE_TITLES } from './constants.js';
 import { formatList, labelForOption } from './helpers.js';
 import { cid } from './ids.js';
 import { buildV2Message } from './responses.js';
-import { buildNavigationRows, buildSceneComponents } from './scenes.js';
+import { buildNavigationRows, buildSceneComponents } from './scenes/index.js';
 import {
   button,
   fileComponent,

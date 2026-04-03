@@ -69,6 +69,47 @@ export const PRESET_OPTIONS = Object.freeze([
   },
 ]);
 
+export const BUILDER_POSTURE_OPTIONS = Object.freeze([
+  {
+    label: 'Gated ship room',
+    value: 'gated',
+    description: 'Tight approvals and explicit sign-off before publish',
+  },
+  {
+    label: 'Staged ramp',
+    value: 'staged',
+    description: 'Roll out in phases with a steady operational cadence',
+  },
+  {
+    label: 'Live-fire test',
+    value: 'live-fire',
+    description: 'Ship fast, watch closely, and keep mitigation owners ready',
+  },
+]);
+
+export const BUILDER_PACKAGE_OPTIONS = Object.freeze([
+  {
+    label: 'Release notes',
+    value: 'release-notes',
+    description: 'Attach the outward-facing update summary',
+  },
+  {
+    label: 'QA checklist',
+    value: 'qa-checklist',
+    description: 'Keep the operator checklist in the publish package',
+  },
+  {
+    label: 'Support brief',
+    value: 'support-brief',
+    description: 'Give support a concise launch handoff note',
+  },
+  {
+    label: 'Analytics snapshot',
+    value: 'analytics-snapshot',
+    description: 'Include the latest product and reliability snapshot',
+  },
+]);
+
 export const SEVERITY_OPTIONS = Object.freeze([
   {
     label: 'Low',
@@ -115,9 +156,10 @@ export const FIELD_IDS = Object.freeze({
   tourName: 'tour_name',
   tourHighlight: 'tour_highlight',
   builderApprovers: 'builder_approvers',
-  builderRoles: 'builder_roles',
-  builderOwners: 'builder_owners',
   builderChannels: 'builder_channels',
+  builderPosture: 'builder_posture',
+  builderPackage: 'builder_package',
+  builderLiveWatch: 'builder_live_watch',
   bugSeverity: 'bug_severity',
   bugSummary: 'bug_summary',
   bugReproduction: 'bug_reproduction',
@@ -143,9 +185,12 @@ export const DEFAULT_BUILDER = Object.freeze({
   reviewers: [],
   owners: [],
   modalApprovers: [],
-  modalRoles: [],
-  modalOwners: [],
   modalChannels: [],
+  modalPosture: 'gated',
+  modalPostureLabel: 'Gated ship room',
+  modalPackageValues: ['release-notes', 'qa-checklist'],
+  modalPackageLabels: ['Release notes', 'QA checklist'],
+  modalLiveWatch: false,
   previewGenerated: false,
 });
 

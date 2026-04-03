@@ -3,9 +3,7 @@ import {
   ChannelType,
   FileUploadBuilder,
   LabelBuilder,
-  MentionableSelectMenuBuilder,
   ModalBuilder,
-  RoleSelectMenuBuilder,
   StringSelectMenuBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -14,6 +12,8 @@ import {
 
 import {
   AUDIENCE_OPTIONS,
+  BUILDER_PACKAGE_OPTIONS,
+  BUILDER_POSTURE_OPTIONS,
   FIELD_IDS,
   LAB_TONE_OPTIONS,
   SEVERITY_OPTIONS,
@@ -21,6 +21,51 @@ import {
 import { cid } from './ids.js';
 import { text } from './primitives.js';
 import { validateModalPayload } from './validation.js';
+
+function rawLabel(label, description, component) {
+  return {
+    type: 18,
+    label,
+    description,
+    component,
+  };
+}
+
+function rawRadioGroup(customId, options, selectedValue, required = true) {
+  return {
+    type: 21,
+    custom_id: customId,
+    required,
+    options: options.map((option) => ({
+      value: option.value,
+      label: option.label,
+      description: option.description,
+      ...(option.value === selectedValue ? { default: true } : {}),
+    })),
+  };
+}
+
+function rawCheckboxGroup(customId, options, selectedValues, required = false) {
+  return {
+    type: 22,
+    custom_id: customId,
+    required,
+    options: options.map((option) => ({
+      value: option.value,
+      label: option.label,
+      description: option.description,
+      ...(selectedValues.includes(option.value) ? { default: true } : {}),
+    })),
+  };
+}
+
+function rawCheckbox(customId, selected) {
+  return {
+    type: 23,
+    custom_id: customId,
+    ...(selected ? { default: true } : {}),
+  };
+}
 
 export function buildTourModal(session) {
   const audienceSelect = new StringSelectMenuBuilder()
@@ -79,59 +124,55 @@ export function buildTourModal(session) {
 
 export function buildBuilderAssistantModal(session) {
   return validateModalPayload(
-    new ModalBuilder()
-      .setCustomId(cid('modal', session.id, 'builder-assistant'))
-      .setTitle('🚀 Launch assistant')
-      .addTextDisplayComponents(
-        text('Use modal-native selects to refine the rollout with richer structured input.'),
-      )
-      .addLabelComponents(
-        new LabelBuilder()
-          .setLabel('Approvers')
-          .setDescription('Who must sign off before launch?')
-          .setUserSelectMenuComponent(
-            new UserSelectMenuBuilder()
-              .setCustomId(FIELD_IDS.builderApprovers)
-              .setPlaceholder('Select approvers')
-              .setRequired(false)
-              .setMinValues(0)
-              .setMaxValues(3),
+    {
+      custom_id: cid('modal', session.id, 'builder-assistant'),
+      title: '🚀 Launch assistant',
+      components: [
+        rawLabel(
+          'Approvers',
+          'Who must explicitly sign off before launch?',
+          new UserSelectMenuBuilder()
+            .setCustomId(FIELD_IDS.builderApprovers)
+            .setPlaceholder('Select approvers')
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(3)
+            .toJSON(),
+        ),
+        rawLabel(
+          'Announcement channels',
+          'Pick the launch rooms that should receive the main update.',
+          new ChannelSelectMenuBuilder()
+            .setCustomId(FIELD_IDS.builderChannels)
+            .setPlaceholder('Select channels')
+            .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+            .setRequired(false)
+            .setMinValues(0)
+            .setMaxValues(3)
+            .toJSON(),
+        ),
+        rawLabel(
+          'Rollout posture',
+          'Choose the overall shipping style for this launch.',
+          rawRadioGroup(FIELD_IDS.builderPosture, BUILDER_POSTURE_OPTIONS, session.builder.modalPosture),
+        ),
+        rawLabel(
+          'Publish package',
+          'Select the handoff artifacts to include with the release.',
+          rawCheckboxGroup(
+            FIELD_IDS.builderPackage,
+            BUILDER_PACKAGE_OPTIONS,
+            session.builder.modalPackageValues,
+            false,
           ),
-        new LabelBuilder()
-          .setLabel('Launch roles')
-          .setDescription('Which roles should be highlighted?')
-          .setRoleSelectMenuComponent(
-            new RoleSelectMenuBuilder()
-              .setCustomId(FIELD_IDS.builderRoles)
-              .setPlaceholder('Select roles')
-              .setRequired(false)
-              .setMinValues(0)
-              .setMaxValues(3),
-          ),
-        new LabelBuilder()
-          .setLabel('Escalation owners')
-          .setDescription('Select people or roles for escalation coverage.')
-          .setMentionableSelectMenuComponent(
-            new MentionableSelectMenuBuilder()
-              .setCustomId(FIELD_IDS.builderOwners)
-              .setPlaceholder('Select mentionables')
-              .setRequired(false)
-              .setMinValues(0)
-              .setMaxValues(4),
-          ),
-        new LabelBuilder()
-          .setLabel('Announcement channels')
-          .setDescription('Pick the rooms that should receive the launch message.')
-          .setChannelSelectMenuComponent(
-            new ChannelSelectMenuBuilder()
-              .setCustomId(FIELD_IDS.builderChannels)
-              .setPlaceholder('Select channels')
-              .setChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
-              .setRequired(false)
-              .setMinValues(0)
-              .setMaxValues(3),
-          ),
-      ),
+        ),
+        rawLabel(
+          'Live watch window',
+          'Keep a post-launch monitoring thread active after publish.',
+          rawCheckbox(FIELD_IDS.builderLiveWatch, session.builder.modalLiveWatch),
+        ),
+      ],
+    },
     'builder assistant modal',
   );
 }

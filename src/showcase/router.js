@@ -1,12 +1,23 @@
 import {
   AUDIENCE_OPTIONS,
+  BUILDER_PACKAGE_OPTIONS,
+  BUILDER_POSTURE_OPTIONS,
   FIELD_IDS,
   LAB_TONE_OPTIONS,
   PRESET_OPTIONS,
   SCENES,
   SEVERITY_OPTIONS,
 } from './constants.js';
-import { collectionValues, labelForOption, mentionableNamesFromInteraction, mentionableNamesFromResolved, userDisplay } from './helpers.js';
+import {
+  collectionValues,
+  findModalFieldComponent,
+  getModalFieldValue,
+  getModalFieldValues,
+  labelForOption,
+  labelsForValues,
+  mentionableNamesFromInteraction,
+  userDisplay,
+} from './helpers.js';
 import { parseCid } from './ids.js';
 import {
   buildBugReceiptMessage,
@@ -111,40 +122,66 @@ export async function handleShowcaseComponent(interaction) {
 }
 
 async function handleSelect(interaction, session, action) {
-  if (action === 'scene') {
-    session.scene = interaction.values[0] ?? SCENES.home;
-    await refreshSessionMessage(interaction, session);
-    return;
-  }
-
-  session.scene = SCENES.builder;
-
   switch (action) {
+    case 'scene': {
+      session.scene = interaction.values[0] ?? SCENES.home;
+      break;
+    }
+    case 'home:featured': {
+      session.scene = interaction.values[0] ?? SCENES.tour;
+      break;
+    }
+    case 'tour:audience-quick': {
+      const value = interaction.values[0];
+      session.scene = SCENES.tour;
+      session.tour.audience = value;
+      session.tour.audienceLabel = labelForOption(AUDIENCE_OPTIONS, value, value);
+      break;
+    }
     case 'builder:preset': {
       const value = interaction.values[0];
+      session.scene = SCENES.builder;
       session.builder.preset = value;
       session.builder.presetLabel = labelForOption(PRESET_OPTIONS, value, value);
       session.builder.previewGenerated = false;
       break;
     }
     case 'builder:channels': {
+      session.scene = SCENES.builder;
       session.builder.channels = collectionValues(interaction.channels, (channel) => `#${channel.name}`);
       session.builder.previewGenerated = false;
       break;
     }
     case 'builder:roles': {
+      session.scene = SCENES.builder;
       session.builder.roles = collectionValues(interaction.roles, (role) => `@${role.name}`);
       session.builder.previewGenerated = false;
       break;
     }
     case 'builder:reviewers': {
+      session.scene = SCENES.builder;
       session.builder.reviewers = collectionValues(interaction.users, userDisplay);
       session.builder.previewGenerated = false;
       break;
     }
     case 'builder:owners': {
+      session.scene = SCENES.builder;
       session.builder.owners = mentionableNamesFromInteraction(interaction);
       session.builder.previewGenerated = false;
+      break;
+    }
+    case 'bug:severity-quick': {
+      const value = interaction.values[0];
+      session.scene = SCENES.bug;
+      session.bug.severityValue = value;
+      session.bug.severityLabel = labelForOption(SEVERITY_OPTIONS, value, value);
+      break;
+    }
+    case 'labs:tone-quick': {
+      const value = interaction.values[0];
+      session.scene = SCENES.labs;
+      session.labs.tone = value;
+      session.labs.toneLabel = labelForOption(LAB_TONE_OPTIONS, value, value);
       break;
     }
     default: {
@@ -196,9 +233,12 @@ async function handleAction(interaction, session, action) {
       session.builder.reviewers = [];
       session.builder.owners = [];
       session.builder.modalApprovers = [];
-      session.builder.modalRoles = [];
-      session.builder.modalOwners = [];
       session.builder.modalChannels = [];
+      session.builder.modalPosture = 'gated';
+      session.builder.modalPostureLabel = 'Gated ship room';
+      session.builder.modalPackageValues = ['release-notes', 'qa-checklist'];
+      session.builder.modalPackageLabels = ['Release notes', 'QA checklist'];
+      session.builder.modalLiveWatch = false;
       session.builder.previewGenerated = false;
       await refreshSessionMessage(interaction, session);
       return;
@@ -271,21 +311,22 @@ export async function handleShowcaseModal(interaction) {
         interaction.fields.getSelectedUsers(FIELD_IDS.builderApprovers, false),
         userDisplay,
       );
-      session.builder.modalRoles = collectionValues(
-        interaction.fields.getSelectedRoles(FIELD_IDS.builderRoles, false),
-        (role) => `@${role.name}`,
-      );
-      session.builder.modalOwners = mentionableNamesFromResolved(
-        interaction.fields.getSelectedMentionables(FIELD_IDS.builderOwners, false),
-      );
       session.builder.modalChannels = collectionValues(
         interaction.fields.getSelectedChannels(FIELD_IDS.builderChannels, false),
         (channel) => `#${channel.name}`,
       );
+      const postureValue = getModalFieldValue(interaction.fields, FIELD_IDS.builderPosture) ?? session.builder.modalPosture;
+      session.builder.modalPosture = postureValue;
+      session.builder.modalPostureLabel = labelForOption(BUILDER_POSTURE_OPTIONS, postureValue, postureValue);
+      const packageValues = getModalFieldValues(interaction.fields, FIELD_IDS.builderPackage);
+      session.builder.modalPackageValues = packageValues;
+      session.builder.modalPackageLabels = labelsForValues(BUILDER_PACKAGE_OPTIONS, packageValues);
+      const liveWatchComponent = findModalFieldComponent(interaction.fields, FIELD_IDS.builderLiveWatch);
+      session.builder.modalLiveWatch = Boolean(liveWatchComponent?.value);
       session.builder.previewGenerated = true;
       session.scene = SCENES.builder;
       await editSessionMessage(interaction.client, session);
-      await interaction.reply(buildEphemeralNote('### 🚀 Launch assistant applied\nThe builder scene now includes the richer modal-based selections in the live preview.'));
+      await interaction.reply(buildEphemeralNote('### 🚀 Launch assistant applied\nThe builder scene now includes radio-group, checkbox-group, and checkbox choices in the live preview.'));
       return;
     }
     case 'bug-report': {

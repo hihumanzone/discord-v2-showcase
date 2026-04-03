@@ -5,7 +5,6 @@ import {
   FileBuilder,
   MediaGalleryBuilder,
   MediaGalleryItemBuilder,
-  SectionBuilder,
   SeparatorBuilder,
   SeparatorSpacingSize,
   TextDisplayBuilder,
@@ -57,10 +56,4 @@ export function linkButton(label, url) {
 
 export function row(...components) {
   return new ActionRowBuilder().addComponents(...components);
-}
-
-export function sectionWithThumbnail({ lines, thumbnail }) {
-  return new SectionBuilder()
-    .addTextDisplayComponents(lines.map((line) => text(line)))
-    .setThumbnailAccessory(thumb(thumbnail.name, thumbnail.description));
 }
